@@ -37,6 +37,8 @@ load_dotenv()
 openai.api_key = os.getenv('OPEN_AI_KEY')
 openai.organization = os.getenv('OPEN_AI_ORG')
 elevenlabs_key = os.getenv('ELEVENLABS_KEY')
+voice_id = os.getenv('VOICE_ID')
+
 
 app = FastAPI()
 
@@ -72,7 +74,9 @@ def transcribe_audio(file):
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
     
     # openAI docs, transcriptions
-    audio_file = open(file.filename, "rb")
+
+    # theres some cheating going on... the file needs to already be there??
+    audio_file = open(f'./testAudio/{file.filename}', "rb")
     transcription = openai.audio.transcriptions.create(
     model = "whisper-1", 
     file = audio_file,
@@ -140,8 +144,6 @@ def save_messages(user_message, gpt_response):
 
 # API post to elevenlabs, gets back audio content
 def text_to_speech(text):
-
-    voice_id = '29vD33N1CtxCmqQRPOHJ'
 
     body = {
         "text": text,
