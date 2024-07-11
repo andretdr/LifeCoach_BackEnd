@@ -19,6 +19,8 @@
 # 1.) Send it audio, have it transcribed
 # 2.) send it to chatgpt to get a response
 # 3.) save chat history to send back and forth for context
+#
+
 
 from fastapi import FastAPI, UploadFile
 from dotenv import load_dotenv
