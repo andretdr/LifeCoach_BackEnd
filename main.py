@@ -31,7 +31,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 
 import openai
-import os
+import os, io
 import json
 import requests
 
@@ -44,8 +44,8 @@ app = FastAPI()
 
 # setup CORS handler
 origins = [
-    "http://localhost:3000",
-    "localhost:3000"
+    "http://localhost:5173",
+    "localhost:5173"
 ]
 
 app.add_middleware(
@@ -71,26 +71,14 @@ async def root():
     print('got here')
     return jsonable_encoder({'message': 'Hello World'})
 
+
 @app.post('/talk')
     # this is a FAST API UPLOAD FILE HANDLER, uploadFile, file: UploadFile
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
 async def post_audio(file: UploadFile):
-    
-
-
-# https://fastapi.tiangolo.com/tutorial/request-files/
-# investigate the file?
-
-
-
-
-
-
-
-
 
     # gets a audio file from client, sends it to openAI to transcribe
-    user_message = {"role": "user", "content": transcribe_audio(file)}
+    user_message = {"role": "user", "content": await transcribe_audio(file)}
     # sends that transscribed msg to openAI, gets their reply and handles file history of chat
     chat_response = get_chat_response(user_message)
     # text to speech openAI's reply
@@ -106,17 +94,20 @@ async def post_audio(file: UploadFile):
 # Functions
 
 # transcribes audio using openAI
-def transcribe_audio(file):
+async def transcribe_audio(file):
     # this is a FAST API UPLOAD FILE HANDLER, uploadFile, format file.filename
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
     
     # openAI docs, transcriptions
 
-    # theres some cheating going on... the file needs to already be there??
-    audio_file = open(f'./testAudio/{file.filename}', "rb")
+    #audio_file = open(file, "rb")
+    audio_data = await file.read()
+    buffer = io.BytesIO(audio_data)
+    buffer.name = "file.mp3"
     transcription = openai.audio.transcriptions.create(
     model = "whisper-1", 
-    file = audio_file,
+    #file = audio_file,
+    file = buffer,
     language = "en"
     )
 
