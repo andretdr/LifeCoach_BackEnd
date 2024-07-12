@@ -20,17 +20,42 @@
 # 2.) send it to chatgpt to get a response
 # 3.) save chat history to send back and forth for context
 #
+# Deploying
+# https://testdriven.io/blog/fastapi-react/
 
 
-from fastapi import FastAPI, UploadFile
-from dotenv import load_dotenv
+from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse
+from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 import openai
 import os
 import json
 import requests
 
+# import uvicorn
+
+# if __name__ == "__main__":
+#     uvicorn.run("app.api:app", host="0.0.0.0", port=8000, reload=True)
+
+app = FastAPI()
+
+# setup CORS handler
+origins = [
+    "http://localhost:3000",
+    "localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+# setup env vars
 load_dotenv()
 
 # grabbing env variables
@@ -39,10 +64,7 @@ openai.organization = os.getenv('OPEN_AI_ORG')
 elevenlabs_key = os.getenv('ELEVENLABS_KEY')
 voice_id = os.getenv('VOICE_ID')
 
-
-app = FastAPI()
-
-
+# app
 @app.get('/')
 async def root():
     return {'message': 'Hello World'}
@@ -52,6 +74,19 @@ async def root():
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
 async def post_audio(file: UploadFile):
     
+
+
+# https://fastapi.tiangolo.com/tutorial/request-files/
+# investigate the file?
+
+
+
+
+
+
+
+
+
     # gets a audio file from client, sends it to openAI to transcribe
     user_message = {"role": "user", "content": transcribe_audio(file)}
     # sends that transscribed msg to openAI, gets their reply and handles file history of chat
