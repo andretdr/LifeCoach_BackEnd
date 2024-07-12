@@ -28,6 +28,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
 
 import openai
 import os
@@ -67,7 +68,8 @@ voice_id = os.getenv('VOICE_ID')
 # app
 @app.get('/')
 async def root():
-    return {'message': 'Hello World'}
+    print('got here')
+    return jsonable_encoder({'message': 'Hello World'})
 
 @app.post('/talk')
     # this is a FAST API UPLOAD FILE HANDLER, uploadFile, file: UploadFile
