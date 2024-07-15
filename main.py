@@ -27,7 +27,7 @@
 
 
 from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import StreamingResponse, FileResponse, Response
+from fastapi.responses import StreamingResponse, FileResponse, Response, JSONResponse
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
@@ -81,32 +81,32 @@ async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
 
 
     historyData = json.loads(history)
-    print(historyData)
-    # gets a audio file from client, sends it to openAI to transcribe
-    user_message = {"role": "user", "content": await transcribe_audio(file)}
-    # sends that transscribed msg to openAI, gets their reply and handles file history of chat
-    chat_response = get_chat_response(user_message)
-    # text to speech openAI's reply
-    audio_output = text_to_speech(chat_response['content'])
 
+# #   ONCE AFTER MID AUG, JUST UNCOMMENT THIS
+#     print(historyData)
+#     # gets a audio file from client, sends it to openAI to transcribe
+#     user_message = {"role": "user", "content": await transcribe_audio(file)}
+#     # sends that transscribed msg to openAI, gets their reply and handles file history of chat
+#     chat_response = get_chat_response(user_message)
+#     # text to speech openAI's reply
+#     audio_output = text_to_speech(chat_response['content'])
 
-
-
+    # this is for testing
+    audio_output = open('./testAudio/test-audio.mp3', 'rb')
 
 #https://www.npmjs.com/package/react-use-audio-player
 
 
-    # output an audio stream, FASTAPI
+#    FOR STREAMING UNCOMMENT ME
 #    def iterfile():   
 #        yield audio_output
+#    return StreamingResponse(iterfile(), media_type="audio/mpeg")
 
-#    data = json.dumps('hi you')
+#    FOR NONSTREAMING UNCOMMENT ME
+#    return Response(content=audio_output, media_type="audio/mpeg")
 
-#    return StreamingResponse(iterfile(), media_type="audio/mpeg"), data
-    return Response(content=audio_output, media_type="audio/mpeg")
-
-
-
+    # this is for testing
+    return FileResponse(path='./testAudio/test-audio.mp3', media_type="audio/mpeg")
 
 
 # Functions
