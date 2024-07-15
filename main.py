@@ -26,8 +26,8 @@
 
 
 
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.responses import StreamingResponse, FileResponse, Response
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
@@ -77,8 +77,11 @@ async def root():
 @app.post('/talk')
     # this is a FAST API UPLOAD FILE HANDLER, uploadFile, file: UploadFile
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
-async def post_audio(file: UploadFile):
+async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
 
+
+    historyData = json.loads(history)
+    print(historyData)
     # gets a audio file from client, sends it to openAI to transcribe
     user_message = {"role": "user", "content": await transcribe_audio(file)}
     # sends that transscribed msg to openAI, gets their reply and handles file history of chat
@@ -90,17 +93,17 @@ async def post_audio(file: UploadFile):
 
 
 
-
-
 #https://www.npmjs.com/package/react-use-audio-player
 
 
     # output an audio stream, FASTAPI
-    def iterfile():   
-        yield audio_output
-    
-    return StreamingResponse(iterfile(), media_type="audio/mpeg")
+#    def iterfile():   
+#        yield audio_output
 
+#    data = json.dumps('hi you')
+
+#    return StreamingResponse(iterfile(), media_type="audio/mpeg"), data
+    return Response(content=audio_output, media_type="audio/mpeg")
 
 
 
@@ -133,6 +136,9 @@ async def transcribe_audio(file):
 def get_chat_response(user_message):
     messages = load_messages()
     messages.append(user_message)
+
+    # print(messages)
+    # print(type(messages))
 
     # Send to OpenAI, get response
     gpt_response = openai.chat.completions.create(
