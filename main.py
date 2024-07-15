@@ -22,10 +22,12 @@
 #
 # Deploying
 # https://testdriven.io/blog/fastapi-react/
+#
+
 
 
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
@@ -84,11 +86,24 @@ async def post_audio(file: UploadFile):
     # text to speech openAI's reply
     audio_output = text_to_speech(chat_response['content'])
 
+
+
+
+
+
+
+#https://www.npmjs.com/package/react-use-audio-player
+
+
     # output an audio stream, FASTAPI
     def iterfile():   
         yield audio_output
     
     return StreamingResponse(iterfile(), media_type="audio/mpeg")
+
+
+
+
 
 
 # Functions
