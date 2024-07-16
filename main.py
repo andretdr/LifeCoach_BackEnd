@@ -23,6 +23,7 @@
 # Deploying
 # https://testdriven.io/blog/fastapi-react/
 #
+# uvicorn main:app --reload
 
 
 
@@ -36,6 +37,7 @@ import openai
 import os, io
 import json
 import requests
+import copy
 
 # import uvicorn
 
@@ -55,8 +57,12 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
+    expose_headers=["Custom-Header"]
 )
+
+# FOR DEV TESTING
+LIVE = True
 
 # setup env vars
 load_dotenv()
@@ -79,20 +85,31 @@ async def root():
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
 async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
 
+    history_chat = json.loads(history)
+    print(f'initial history : {history_chat}')
+    
+    # gets the audio file from client, sends it to openAI to transcribe
+    user_message = {"role": "user", "content": await transcribe_audio(file)}
+    # sends that transscribed msg to openAI, gets their reply and handles file history of chat
+    updated_chat = get_chat_response(user_message, history_chat)
+    print(f'updated_chat : {updated_chat}')
+    # update historyData with new responses
 
-    historyData = json.loads(history)
 
-# #   ONCE AFTER MID AUG, JUST UNCOMMENT THIS
-#     print(historyData)
-#     # gets a audio file from client, sends it to openAI to transcribe
-#     user_message = {"role": "user", "content": await transcribe_audio(file)}
-#     # sends that transscribed msg to openAI, gets their reply and handles file history of chat
-#     chat_response = get_chat_response(user_message)
-#     # text to speech openAI's reply
-#     audio_output = text_to_speech(chat_response['content'])
+
+
+#   ONCE AFTER MID AUG, JUST UNCOMMENT THIS
+    # print(historyData)
+    # # gets a audio file from client, sends it to openAI to transcribe
+    # user_message = {"role": "user", "content": await transcribe_audio(file)}
+    # # sends that transscribed msg to openAI, gets their reply and handles file history of chat
+    # chat_response = get_chat_response(user_message)
+    # # text to speech openAI's reply
+    # audio_output = text_to_speech(chat_response['content'])
 
     # this is for testing
-    audio_output = open('./testAudio/test-audio.mp3', 'rb')
+    with open('./testAudio/test-audio.mp3', mode='rb') as audio_file:
+        audio_output = audio_file.read()
 
 #https://www.npmjs.com/package/react-use-audio-player
 
@@ -105,11 +122,21 @@ async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
 #    FOR NONSTREAMING UNCOMMENT ME
 #    return Response(content=audio_output, media_type="audio/mpeg")
 
+
     # this is for testing
-    return FileResponse(path='./testAudio/test-audio.mp3', media_type="audio/mpeg")
+#    return FileResponse(path=audio_output, media_type="audio/mpeg")
+#    return dataObj #Response({'audio':audio_output, 'data':data})
+
+    return JSONResponse(updated_chat)
+
+
 
 
 # Functions
+
+
+
+
 
 # transcribes audio using openAI
 async def transcribe_audio(file):
@@ -118,77 +145,80 @@ async def transcribe_audio(file):
     
     # openAI docs, transcriptions
 
-    #audio_file = open(file, "rb")
-    audio_data = await file.read()
-    buffer = io.BytesIO(audio_data)
-    buffer.name = "file.mp3"
-    transcription = openai.audio.transcriptions.create(
-    model = "whisper-1", 
-    #file = audio_file,
-    file = buffer,
-    language = "en"
-    )
+    if LIVE:
+        audio_data = await file.read()
+        buffer = io.BytesIO(audio_data)
+        buffer.name = "file.mp3"
+        transcription = openai.audio.transcriptions.create(
+            model = "whisper-1", 
+            #file = audio_file,
+            file = buffer,
+            language = "en"
+        )
+        return transcription.text
+    else:
+        return 'not live, Hi, how are you?'
 
-    return transcription.text
 
 
 # load history, get openAI response, save history 
-def get_chat_response(user_message):
-    messages = load_messages()
+def get_chat_response(user_message, history_message):
+
+    messages = initialise_messages(history_message)
     messages.append(user_message)
 
-    # print(messages)
     # print(type(messages))
 
     # Send to OpenAI, get response
-    gpt_response = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages = messages
-        )
+    if LIVE:
+        gpt_response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages = messages
+            )
 
-    parsed_response = to_dict(gpt_response.choices[0].message)
+        parsed_response = to_dict(gpt_response.choices[0].message)
+
+    else:
+        parsed_response = {"role": "assistant",
+        "content": "greg's transcribed response"}
 
     # Save messages in database.json
-    save_messages(user_message, parsed_response)
+    messages.append(parsed_response)
+    
+    return messages
 
-    return parsed_response
 
-# LOAD MESSAGES FROM DATABASE.JSON
-# Chat Completions API
-# https://platform.openai.com/docs/guides/text-generation/chat-completions-api
-def load_messages():
+# INITIALISE MESSAGES FROM CLIENT SIDE HISTORY
+def initialise_messages(history_message):
+
     messages = []
-    file = 'database.json'
-
     # context for chatBot
-    context = "You are interviewing the user for a front-end React developer position. Ask short questions that are relevant for a junior position. Your name is Greg. The user is Andre. Keep responses under 30 words and be funny sometimes."
+#    context = "You are interviewing the user for a front-end React developer position. Ask short questions that are relevant for a junior position. Your name is Greg. The user is Andre. Keep responses under 30 words and be funny sometimes."
+    context = 'Ask generic questions about life and well-being. Keep questions and responses short, under 15 words if possible'
 
-    # check if file is empty
-    empty = os.stat(file).st_size == 0
+    empty = (len(history_message) == 0)
 
-    # if file not empty loop through and add to messages
+    # if file not empty just return it
     if not empty:
-        with open(file) as db_file:
-            data = json.load(db_file)    
-            for item in data:
-                messages.append(item)
+        return history_message
     # if file is empty we need to add the context, 'system role'    
     else:
         messages.append(
             {"role": "system", "content": context},
         )
-    return messages
+        return [{"role": "system", "content": context}]
+
 
 # write to file
-def save_messages(user_message, gpt_response):
-    file = 'database.json'
-    # load all history, append user msg and gpt reply
-    messages = load_messages()
-    messages.append(user_message)
-    messages.append(gpt_response)
-    # write and dump everything into file
-    with open(file, 'w') as f:
-        json.dump(messages, f)
+# def save_messages(user_message, gpt_response, history_message):
+
+#     # load all history, append user msg and gpt reply
+#     messages = []
+#     messages.append(history_message)
+#     messages.append(user_message)
+#     messages.append(gpt_response)
+#     # write and dump everything into file
+#     return messages
 
 
 # API post to elevenlabs, gets back audio content
