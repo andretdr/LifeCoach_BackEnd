@@ -62,7 +62,8 @@ app.add_middleware(
 )
 
 # FOR DEV TESTING
-LIVE = True
+LIVE = False
+elevenLabs = True
 
 # setup env vars
 load_dotenv()
@@ -95,38 +96,6 @@ async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
     print(f'updated_chat : {updated_chat}')
     # update historyData with new responses
 
-
-
-
-#   ONCE AFTER MID AUG, JUST UNCOMMENT THIS
-    # print(historyData)
-    # # gets a audio file from client, sends it to openAI to transcribe
-    # user_message = {"role": "user", "content": await transcribe_audio(file)}
-    # # sends that transscribed msg to openAI, gets their reply and handles file history of chat
-    # chat_response = get_chat_response(user_message)
-    # # text to speech openAI's reply
-    # audio_output = text_to_speech(chat_response['content'])
-
-    # this is for testing
-    # with open('./testAudio/test-audio.mp3', mode='rb') as audio_file:
-    #     audio_output = audio_file.read()
-
-#https://www.npmjs.com/package/react-use-audio-player
-
-
-#    FOR STREAMING UNCOMMENT ME
-#    def iterfile():   
-#        yield audio_output
-#    return StreamingResponse(iterfile(), media_type="audio/mpeg")
-
-#    FOR NONSTREAMING UNCOMMENT ME
-#    return Response(content=audio_output, media_type="audio/mpeg")
-
-
-    # this is for testing
-#    return FileResponse(path=audio_output, media_type="audio/mpeg")
-#    return dataObj #Response({'audio':audio_output, 'data':data})
-
     return JSONResponse(updated_chat)
 
 
@@ -142,9 +111,6 @@ async def post_audio(history: str = Form(...)):
     audio_output = text_to_speech(latest_response)
 
     return Response(content=audio_output, media_type="audio/mpeg")
-
-
-
 
 
 # Functions
@@ -178,8 +144,6 @@ def get_chat_response(user_message, history_message):
     messages = initialise_messages(history_message)
     messages.append(user_message)
 
-    # print(type(messages))
-
     # Send to OpenAI, get response
     if LIVE:
         gpt_response = openai.chat.completions.create(
@@ -205,7 +169,10 @@ def initialise_messages(history_message):
     messages = []
     # context for chatBot
 #    context = "You are interviewing the user for a front-end React developer position. Ask short questions that are relevant for a junior position. Your name is Greg. The user is Andre. Keep responses under 30 words and be funny sometimes."
-    context = 'Ask generic questions about life and well-being. Keep questions and responses short, under 15 words if possible'
+#    context = 'Ask generic questions about life and well-being. Keep questions and responses short, under 15 words if possible'
+    context = []
+    context.append("Your name is Mel. You are a life coach giving advice on how to get to the next step in the user's life and career. Ask short questions to find out more about the user and give suggestions on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes")
+    context.append("Your name is Mel. You are a career coach giving advice on how to get to the next step in the user's career. Ask short questions to find out more about the user's career situation and offer advice on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes")
 
     empty = (len(history_message) == 0)
 
@@ -215,28 +182,19 @@ def initialise_messages(history_message):
     # if file is empty we need to add the context, 'system role'    
     else:
         messages.append(
-            {"role": "system", "content": context},
+            {"role": "system", "content": context[1]},
         )
-        return [{"role": "system", "content": context}]
-
-
-# write to file
-# def save_messages(user_message, gpt_response, history_message):
-
-#     # load all history, append user msg and gpt reply
-#     messages = []
-#     messages.append(history_message)
-#     messages.append(user_message)
-#     messages.append(gpt_response)
-#     # write and dump everything into file
-#     return messages
+        return [{"role": "system", "content": context[1]}]
 
 
 # API post to elevenlabs, gets back audio content
 def text_to_speech(text):
 
+    
+
     body = {
         "text": text,
+       # "text": "Hi my name is Dave, what's your current job and what's your next career goal? Let's plan how to get you there!",
         "model_id": "eleven_monolingual_v1",
         "voice_settings": {
             "stability": 0,
@@ -254,7 +212,7 @@ def text_to_speech(text):
 
     url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
 
-    if LIVE:
+    if LIVE and elevenLabs:
         try:
             response = requests.post(url, json=body, headers=headers)
             # if all good, return content
