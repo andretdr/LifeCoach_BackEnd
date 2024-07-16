@@ -108,8 +108,8 @@ async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
     # audio_output = text_to_speech(chat_response['content'])
 
     # this is for testing
-    with open('./testAudio/test-audio.mp3', mode='rb') as audio_file:
-        audio_output = audio_file.read()
+    # with open('./testAudio/test-audio.mp3', mode='rb') as audio_file:
+    #     audio_output = audio_file.read()
 
 #https://www.npmjs.com/package/react-use-audio-player
 
@@ -130,13 +130,24 @@ async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
     return JSONResponse(updated_chat)
 
 
+# gets text to speech from elevenLabs, then returns the audio blob
+@app.post('/reply')
+async def post_audio(history: str = Form(...)):
+
+    history_chat = json.loads(history)
+    latest_response = history_chat[len(history_chat)-1]['content']
+
+    print(f'latest_response : {latest_response}')
+    # text to speech openAI's reply
+    audio_output = text_to_speech(latest_response)
+
+    return Response(content=audio_output, media_type="audio/mpeg")
+
+
+
 
 
 # Functions
-
-
-
-
 
 # transcribes audio using openAI
 async def transcribe_audio(file):
@@ -243,15 +254,20 @@ def text_to_speech(text):
 
     url = f'https://api.elevenlabs.io/v1/text-to-speech/{voice_id}'
 
-    try:
-        response = requests.post(url, json=body, headers=headers)
-        # if all good, return content
-        if response.status_code == 200:
-            return response.content
-        else:
-            print('Something went wrong')
-    except Exception as e:
-        print(e)
+    if LIVE:
+        try:
+            response = requests.post(url, json=body, headers=headers)
+            # if all good, return content
+            if response.status_code == 200:
+                return response.content
+            else:
+                print('Something went wrong')
+        except Exception as e:
+            print(e)
+    else:
+        with open('./testAudio/test-audio.mp3', mode='rb') as audio_file:
+            audio_output = audio_file.read()
+        return audio_output
     
 
 # to dict chatcompletionmessage as it was not a dict
