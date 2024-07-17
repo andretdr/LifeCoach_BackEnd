@@ -37,6 +37,11 @@ from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 
+import openai
+import os, io
+import json
+import requests
+
 # import uvicorn
 
 # if __name__ == "__main__":
@@ -56,6 +61,20 @@ app.add_middleware(
     # allow_headers=["*"],
     # expose_headers=["Custom-Header"]
 )
+
+# FOR DEV TESTING
+LIVE = True
+elevenLabs = True
+
+# setup env vars
+load_dotenv()
+
+# grabbing env variables
+openai.api_key = os.getenv('OPEN_AI_KEY')
+openai.organization = os.getenv('OPEN_AI_ORG')
+elevenlabs_key = os.getenv('ELEVENLABS_KEY')
+voice_id = os.getenv('VOICE_ID')
+
 
 # app
 @app.get('/')
