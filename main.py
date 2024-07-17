@@ -24,6 +24,7 @@
 # https://testdriven.io/blog/fastapi-react/
 #
 # uvicorn main:app --reload
+# https://stackoverflow.com/questions/59391560/how-to-run-uvicorn-in-heroku
 
 
 
