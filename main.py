@@ -27,7 +27,7 @@
 # https://stackoverflow.com/questions/59391560/how-to-run-uvicorn-in-heroku
 
 # https://www.youtube.com/watch?v=H7zAJf20Moc
-# 
+# https://jnikenoueba.medium.com/how-to-deploy-a-fastapi-api-on-heroku-7d805cb83ffa
 
 
 
