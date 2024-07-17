@@ -76,8 +76,7 @@ voice_id = os.getenv('VOICE_ID')
 # app
 @app.get('/')
 async def root():
-    print('got here')
-    return jsonable_encoder({'message': 'Hello World'})
+    return jsonable_encoder({'message': 'Created by Andre Tong'})
 
 
 @app.post('/talk')
@@ -86,13 +85,13 @@ async def root():
 async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
 
     history_chat = json.loads(history)
-    print(f'initial history : {history_chat}')
+    # print(f'initial history : {history_chat}')
     
     # gets the audio file from client, sends it to openAI to transcribe
     user_message = {"role": "user", "content": await transcribe_audio(file)}
     # sends that transscribed msg to openAI, gets their reply and handles file history of chat
     updated_chat = get_chat_response(user_message, history_chat)
-    print(f'updated_chat : {updated_chat}')
+    # print(f'updated_chat : {updated_chat}')
     # update historyData with new responses
 
     return JSONResponse(updated_chat)
@@ -105,7 +104,7 @@ async def post_audio(history: str = Form(...)):
     history_chat = json.loads(history)
     latest_response = history_chat[len(history_chat)-1]['content']
 
-    print(f'latest_response : {latest_response}')
+    # print(f'latest_response : {latest_response}')
     # text to speech openAI's reply
     audio_output = text_to_speech(latest_response)
 
