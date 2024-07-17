@@ -1,1 +1,1 @@
-web: uvicorn main:app --workers 4
+web: uvicorn main:app --bind 0.0.0.0:$PORT --workers 4
