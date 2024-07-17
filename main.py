@@ -170,8 +170,8 @@ def initialise_messages(history_message):
 #    context = "You are interviewing the user for a front-end React developer position. Ask short questions that are relevant for a junior position. Your name is Greg. The user is Andre. Keep responses under 30 words and be funny sometimes."
 #    context = 'Ask generic questions about life and well-being. Keep questions and responses short, under 15 words if possible'
     context = []
-    context.append("Your name is Dave. You are a life coach giving advice on how to get to the next step in the user's personal or professional life. Ask short questions to find out more about the user's goals and give suggestions on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes. Do not say #lifecoach")
-    context.append("Your name is Mel. You are a career coach giving advice on how to get to the next step in the user's career. Ask short questions to find out more about the user's career situation and offer advice on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes")
+    context.append("Your name is Dave. You are a life coach giving advice on how to get to the next step in the user's personal or professional life. Ask short questions to find out more about the user's goals and give suggestions on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes. Always try to end off with a question. Do not say #lifecoach")
+    context.append("Your name is Dave. You are a career coach giving advice on how to get to the next step in the user's career. Ask short questions to find out more about the user's career situation and offer advice on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes")
 
     empty = (len(history_message) == 0)
 
@@ -181,9 +181,9 @@ def initialise_messages(history_message):
     # if file is empty we need to add the context, 'system role'    
     else:
         messages.append(
-            {"role": "system", "content": context[1]},
+            {"role": "system", "content": context[0]},
         )
-        return [{"role": "system", "content": context[1]}]
+        return [{"role": "system", "content": context[0]}]
 
 
 # API post to elevenlabs, gets back audio content
@@ -193,7 +193,7 @@ def text_to_speech(text):
 
     body = {
         "text": text,
-       # "text": "Hi my name is Dave, what's your current job and what's your next career goal? Let's plan how to get you there!",
+       # "text": "Hi my name is Dave, how can I help you with your personal or professional goals?",
         "model_id": "eleven_monolingual_v1",
         "voice_settings": {
             "stability": 0,
