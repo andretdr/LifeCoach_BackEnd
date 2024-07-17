@@ -26,6 +26,9 @@
 # uvicorn main:app --reload
 # https://stackoverflow.com/questions/59391560/how-to-run-uvicorn-in-heroku
 
+# https://www.youtube.com/watch?v=H7zAJf20Moc
+# https://tutlinks.com/create-and-deploy-fastapi-app-to-heroku/
+
 
 
 from fastapi import FastAPI, File, UploadFile, Form
