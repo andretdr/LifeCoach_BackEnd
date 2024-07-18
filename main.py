@@ -45,12 +45,9 @@ app = FastAPI()
 
 # setup CORS handler
 origins = [
-    "https://lifecoach-frontend.vercel.app:8000",
-    "lifecoach-frontend.vercel.app:8000",
-    "https://lifecoach-frontend.vercel.app",
-    "lifecoach-frontend.vercel.app",
+
     "http://localhost:5173",
-    "localhost:5173"
+    "localhost:5173",
 ]
 
 app.add_middleware(
@@ -59,7 +56,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Custom-Header"]
 )
 
 # FOR DEV TESTING
