@@ -81,6 +81,7 @@ async def root():
     # this is a FAST API UPLOAD FILE HANDLER, uploadFile, file: UploadFile
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
 async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
+    print('got here')
 
     history_chat = json.loads(history)
     # print(f'initial history : {history_chat}')
@@ -165,7 +166,6 @@ def initialise_messages(history_message):
     messages = []
     # context for chatBot
 #    context = "You are interviewing the user for a front-end React developer position. Ask short questions that are relevant for a junior position. Your name is Greg. The user is Andre. Keep responses under 30 words and be funny sometimes."
-#    context = 'Ask generic questions about life and well-being. Keep questions and responses short, under 15 words if possible'
     context = []
     context.append("Your name is Dave. You are a life coach giving advice on how to get to the next step in the user's personal or professional life. Ask short questions to find out more about the user's goals and give suggestions on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes. Do not say #lifecoach")
     context.append("Your name is Dave. You are a career coach giving advice on how to get to the next step in the user's career. Ask short questions to find out more about the user's career situation and offer advice on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes")
@@ -190,7 +190,7 @@ def text_to_speech(text):
 
     body = {
         "text": text,
-       # "text": "Hi my name is Dave, how can I help you with your personal or professional goals?",
+#        "text": "Hi my name is Dave, tell me your personal or professional goals.",
         "model_id": "eleven_monolingual_v1",
         "voice_settings": {
             "stability": 0,
