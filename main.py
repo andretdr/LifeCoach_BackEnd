@@ -47,7 +47,7 @@ app = FastAPI()
 origins = [
     "https://lifecoach-frontend.vercel.app",
     "lifecoach-frontend.vercel.app",
-    "https://localhost:5173",
+    "http://localhost:5173",
     "localhost:5173"
 ]
 
@@ -61,7 +61,7 @@ app.add_middleware(
 )
 
 # FOR DEV TESTING
-LIVE = True
+LIVE = False
 elevenLabs = True
 
 # setup env vars
