@@ -1,24 +1,20 @@
 # Introduction
-Front End Suites is a collection of pages developed using Frontend Frameworks.
-They are inspired by freecodecamp capstone projects and created by me, Andre Tong.
+LifeCoach is a full-stack demo project created by me, developed to mimic conversations with a Life Coach. On the Backend, it is implemented on fastAPI and features a REST API, and runs on OpenAI's Chat Completions and Audio Transcriptions API. It utilises ElevenLabs for voicing. It is created by me, Andre Tong.
 You can find the link to the app below.
 
-[Front End Suites](https://front-end-suites.vercel.app/)
+[LifeCoach](https://lifecoach-frontend.vercel.app/)
 
 # Development
-The collect of apps is developed with each using a different combination of React, Redux, Bootstrap, Vanilla CSS to implement.
-It is built on Vite using Node.js and managed with NPM. It is deployed on Vercel.
+The back-end is developed using fastAPI / Python.
 
 # Full feature list
-- It is a Single Page Application using HashRouter for navigation.
-- Random Quote Generator features **API calls** to retrieve a list of random quote to display.
-- All pages feature responsive design for small to large screen use.
-- Handles global state using either Redux or useContext Hook.
-- Styling using bootstrap and CSS.
-
-# Calculations
-Calculator page evaluates its results in two steps.  
-It implements an infix to postfix algorithmn using a stack, and then more easily evaluates the postfix expression again using a stack.
-
-# Known Bugs
-- Audio does not play responsively on mobile, hence the drum demo was taken down. Will need to investigate a better way to do this
+- The back-end has 3 routes.
+- '/' route is mainly for testing and just returns a json message
+- '/talk' route accepts Formdata of a audio file and a json array. The audio file is a recording of user's response and the array is the chat history so far.
+    If this is the first response, it will setup the context of the chat within the chat history.
+    It will firstly transcribe the audio file into a text reply using a call to openAI's transcription API.
+    Then it will append the text reply to the chat history and send that to openAI's chat completion API to recieve a reply from chatGPT 3.5
+    Finally it will return just the chat history itself.
+- '/reply' routes accepts Formdata of a json array. The array is the chat history so far.
+    It will send the latest reply from chatGPT 3.5 in the chat history to elevenLab's text to speech API.
+    Finally it will return this audio response
