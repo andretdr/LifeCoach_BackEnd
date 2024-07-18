@@ -45,8 +45,8 @@ app = FastAPI()
 
 # setup CORS handler
 origins = [
-    "http://localhost:5173",
-    "localhost:5173"
+    "https://lifecoach-frontend.vercel.app",
+    "lifecoach-frontend.vercel.app"
 ]
 
 app.add_middleware(
