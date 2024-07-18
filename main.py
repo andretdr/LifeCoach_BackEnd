@@ -59,7 +59,7 @@ app.add_middleware(
 )
 
 # FOR DEV TESTING
-LIVE = False
+LIVE = True
 elevenLabs = True
 
 # setup env vars
