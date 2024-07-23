@@ -63,7 +63,7 @@ app.add_middleware(
 
 # FOR DEV TESTING
 LIVE = True
-elevenLabs = False
+elevenLabs = True
 
 # setup env vars
 load_dotenv()
