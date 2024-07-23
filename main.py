@@ -63,7 +63,7 @@ app.add_middleware(
 
 # FOR DEV TESTING
 LIVE = True
-elevenLabs = True
+elevenLabs = False
 
 # setup env vars
 load_dotenv()
@@ -84,7 +84,6 @@ async def root():
     # this is a FAST API UPLOAD FILE HANDLER, uploadFile, file: UploadFile
     # https://fastapi.tiangolo.com/tutorial/request-files/?h=upload#define-file-parameters
 async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
-    print('got here')
 
     history_chat = json.loads(history)
     # print(f'initial history : {history_chat}')
@@ -95,6 +94,8 @@ async def post_audio(file: UploadFile = File(...), history: str = Form(...)):
     updated_chat = get_chat_response(user_message, history_chat)
     # print(f'updated_chat : {updated_chat}')
     # update historyData with new responses
+
+    print(updated_chat)
 
     return JSONResponse(updated_chat)
 
@@ -123,16 +124,20 @@ async def transcribe_audio(file):
     # openAI docs, transcriptions
 
     if LIVE:
-        audio_data = await file.read()
-        buffer = io.BytesIO(audio_data)
-        buffer.name = "file.mp3"
-        transcription = openai.audio.transcriptions.create(
-            model = "whisper-1", 
-            #file = audio_file,
-            file = buffer,
-            language = "en"
-        )
-        return transcription.text
+        try:
+            audio_data = await file.read()
+            buffer = io.BytesIO(audio_data)
+            buffer.name = "file.mp3"
+            transcription = openai.audio.transcriptions.create(
+                model = "whisper-1", 
+                #file = audio_file,
+                file = buffer,
+                language = "en"
+            )
+            return transcription.text
+        except: 
+            print('error on transciption')
+
     else:
         return 'not live, Hi, how are you?'
 
@@ -170,8 +175,8 @@ def initialise_messages(history_message):
     # context for chatBot
 #    context = "You are interviewing the user for a front-end React developer position. Ask short questions that are relevant for a junior position. Your name is Greg. The user is Andre. Keep responses under 30 words and be funny sometimes."
     context = []
-    context.append("Your name is Dave. You are a life coach giving advice on how to get to the next step in the user's personal or professional life. Ask short questions to find out more about the user's goals and give suggestions on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes. Do not say #lifecoach")
-    context.append("Your name is Dave. You are a career coach giving advice on how to get to the next step in the user's career. Ask short questions to find out more about the user's career situation and offer advice on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes")
+    context.append("Your name is Dave. You are a life coach giving advice on how to get to the next step in the user's personal or professional life. Ask short questions to find out more about the user's goals and motivations, so that you can respond more accurately. Give suggestions if he asks for advice. Adapt to his requests and always try to help using active listening techniques. Keep your response under 20 words if possible, and be funny sometimes, but not often. If you do ask a question, keep it to the end, ask only one for each response, and try not to repeat it. Do not say #lifecoach")
+    context.append("Your name is Dave. You are a career coach giving advice on how to get to the next step in the user's career. Ask short questions to find out more about the user's career situation and offer advice on how he can improve his current position. Keep your response under 20 words if possible, and be funny sometimes, but not often. Always end with a followup question.")
 
     empty = (len(history_message) == 0)
 
