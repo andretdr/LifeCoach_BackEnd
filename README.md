@@ -2,7 +2,7 @@
 LifeCoach is a full-stack demo project created by me, developed to mimic conversations with a Life Coach. On the Backend, it is implemented on fastAPI and features a REST API, and runs on OpenAI's Chat Completions and Audio Transcriptions API. It utilises ElevenLabs for voicing.   
 It is inspired by Travis Media's tutorial [here](https://youtu.be/4y1a4syMJHM)   
 
-Front End info can be found [here](https://github.com/andretdr/LifeCoach_FrontEnd)
+Front End implementation can be found [here](https://github.com/andretdr/LifeCoach_FrontEnd)
 
 It is created by me, Andre Tong.
 You can find the link to the app below.
